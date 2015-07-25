@@ -1,4 +1,4 @@
-﻿var models = require('../models/models.js');
+var models = require('../models/models.js');
 
 // Autoload - factoriza el códigos si ruta incluye :quizId
 exports.load = function(req, res, next, quizId)
@@ -21,10 +21,20 @@ exports.load = function(req, res, next, quizId)
 //GET /quizes
 exports.index = function(req, res)
 {
-	models.Quiz.findAll().then(function(quizes)
+	if (req.query.search)
 	{
-		res.render('quizes/index.ejs', {quizes: quizes});
-	}).catch(function(error) { next(error); })
+		models.Quiz.findAll({where: ["pregunta like ?", '%' + req.query.search.replace(/ /g,"%") + '%']}).then(function(quizes)
+		{	
+			res.render('quizes/index.ejs', {quizes: quizes});
+		}).catch(function(error) { next(error); });
+	}
+	else 
+	{
+		models.Quiz.findAll().then(function(quizes)
+		{	
+			res.render('quizes/index.ejs', {quizes: quizes});
+		}).catch(function(error) { next(error); });
+	}
 };
 
 
@@ -42,11 +52,9 @@ exports.show = function(req, res)
  exports.answer = function(req, res)
 {
 	var resultado = 'Incorrecto';
- 	if (req.query.respuesta === req.quiz.respuesta)
-    	{
-    	resultado = 'Correcto';
-    	}
-    	res.render('quizes/answer', {quiz: req.quiz, respuesta: resultado});
+ 	if (req.query.respuesta === req.quiz.respuesta) resultado = 'Correcto';
+
+    res.render('quizes/answer', {quiz: req.quiz, respuesta: resultado});
 };
 
 

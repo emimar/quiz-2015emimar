@@ -1,5 +1,15 @@
-<table>
+<!DOCTYPE html>
+<html>
+ <body>
+ <table>
    <% var i; for (i=0; i<quizes.length; i++) { %>
       <tr><td><a href="quizes/<%= quizes[i].id %>"><%= quizes[i].pregunta %></a></td></tr> 
     <% } %>
 </table>
+ <form method = "get" action = "/quizes">
+ Busque una pregunta <br>
+ <input type = "text" name = "search" value = "Escriba aqui"> 
+ <input type = "submit" value = "Enviar"> <br>
+ </form>
+ </body>
+</html>
