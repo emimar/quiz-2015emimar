@@ -3,7 +3,7 @@ var models = require('../models/models.js');
 // Autoload - factoriza el códigos si ruta incluye :quizId
 exports.load = function(req, res, next, quizId)
 {
-	models.Quiz.find(quizId).then(function(quiz)
+	models.Quiz.findById(quizId).then(function(quiz)
 	{
 		if (quiz)
 			{
@@ -25,15 +25,15 @@ exports.index = function(req, res)
 	{
 		models.Quiz.findAll({where: ["pregunta like ?", '%' + req.query.search.replace(/ /g,"%") + '%']}).then(function(quizes)
 		{	
-			res.render('quizes/index.ejs', {quizes: quizes});
-		}).catch(function(error) { next(error); });
+			res.render('quizes/index.ejs', {quizes: quizes, errors: []});
+		}).catch(function(error) { next(error) });
 	}
 	else 
 	{
 		models.Quiz.findAll().then(function(quizes)
 		{	
-			res.render('quizes/index.ejs', {quizes: quizes});
-		}).catch(function(error) { next(error); });
+			res.render('quizes/index.ejs', {quizes: quizes, errors: []});
+		}).catch(function(error) { next(error) });
 	}
 };
 
@@ -41,9 +41,9 @@ exports.index = function(req, res)
 //GET /quizes/:id
 exports.show = function(req, res)
 {
-	models.Quiz.find(req.params.quizId).then(function(quiz)
+	models.Quiz.findById(req.params.quizId).then(function(quiz)
 	{
-		res.render('quizes/show', {quiz: req.quiz});
+		res.render('quizes/show', {quiz: req.quiz, errors: []});
 	})
 };
 
@@ -54,7 +54,7 @@ exports.show = function(req, res)
 	var resultado = 'Incorrecto';
  	if (req.query.respuesta === req.quiz.respuesta) resultado = 'Correcto';
 
-    res.render('quizes/answer', {quiz: req.quiz, respuesta: resultado});
+    res.render('quizes/answer', {quiz: req.quiz, respuesta: resultado, errors: []});
 };
 
 
@@ -62,7 +62,7 @@ exports.show = function(req, res)
 exports.new = function(req, res)
 {
 	var quiz = models.Quiz.build( {pregunta: "Pregunta", respuesta: "Respuesta"} );
-	res.render('quizes/new', {quiz: quiz});
+	res.render('quizes/new', {quiz: quiz, errors: []});
 };
 
 
@@ -70,15 +70,27 @@ exports.new = function(req, res)
 exports.create = function(req, res)
 {
 	var quiz = models.Quiz.build( req.body.quiz );
-	// guarda en BD los campos pregunta y respuesta dd quiz
-	quiz.save( {fields: ["pregunta", "respuesta"]} ).then(function()
+
+	quiz.validate().then(function(err)
 	{
-		res.redirect('/quizes');
-	}) //Redirección HTTP (URL relativo) lista de preguntas
+		if (err)
+		{
+			res.render('quizes/new', {quiz: quiz, errors: err.errors});
+		}
+		else
+		{
+			// guarda en BD los campos pregunta y respuesta dd quiz
+			quiz.save( {fields: ["pregunta", "respuesta"]} ).then(function()
+			{
+				//Redirección HTTP (URL relativo) lista de preguntas
+				res.redirect('/quizes');
+			})
+		}
+	});
 };
 
 
 //GET /author
 exports.author = function(req, res){
-	res.render('author', {autor: 'Mª José Navarro Carrasco'});
+	res.render('author', {autor: 'Mª José Navarro Carrasco', errors: []});
 };
