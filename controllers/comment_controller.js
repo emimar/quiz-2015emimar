@@ -3,7 +3,7 @@ var models = require('../models/models.js');
 //Autoload :id de comentarios
 exports.load = function(req, res, next, commentId)
 {
-	models.comment.find(
+	models.Comment.find(
 	{
 		where: {id: Number(commentId)}}).then(function(comment)
 		{
@@ -14,9 +14,10 @@ exports.load = function(req, res, next, commentId)
 			}
 			else
 			{
-				{next(new Error('No existe commentId='+ commentId))}
+				{next(new Error('No existe commentId= ' + commentId))}
 			}
-		}).catch(function(error){next(error)});
+		}).catch(function(error){next(error)
+	});
 };
 
 
@@ -62,6 +63,6 @@ exports.publish = function(req, res)
 	req.comment.publicado = true;
 	req.comment.save({fields: ["publicado"]}).then(function()
 	{
-		res.redirect('/quizes/'+ req.params.quizId);
+		res.redirect('/quizes/' + req.params.quizId);
 	}).catch(function(error) {next(error)});
 };
