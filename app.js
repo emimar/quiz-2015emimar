@@ -40,6 +40,34 @@ app.use(function(req, res, next)
 	next();
 });
 
+app.use(function(req, res, next)
+{
+	if (req.session.user)
+	{
+		var fecActual = new Date().getTime();	
+		if (!req.session.ultimoAcceso)
+		{
+			req.session.ultimoAcceso = new Date().getTime();
+		}
+		var tiempo = (fecActual - req.session.ultimoAcceso)/1000;
+		console.log('Tiempo: ' + tiempo);
+		if (tiempo <= 120)
+		{
+			req.session.ultimoAcceso = fecActual;
+		}
+		else
+		{
+			delete req.session.user;
+			delete req.session.ultimoAcceso;
+		}
+		next();
+	}
+	else
+	{
+		next();
+	}
+});
+
 app.use('/', routes);
 
 // catch 404 and forward to error handler
